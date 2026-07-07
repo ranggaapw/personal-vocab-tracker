@@ -5,21 +5,41 @@ import { VocabBox } from './components/VocabBox';
 import { SentenceBox } from './components/SentenceBox';
 import { TensesBox } from './components/TensesBox';
 import { LanguageSelect } from './components/ui/LanguageSelect';
-import { Toast } from './components/ui/Toast';
+import { ToastContainer } from './components/ui/Toast';
 import { Settings2 } from 'lucide-react';
+
+interface ToastItem {
+  id: string;
+  type: 'success' | 'error' | 'info' | 'warning';
+  title: string;
+  message?: string;
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'vocab' | 'sentence' | 'tenses'>('vocab');
   const [targetLang, setTargetLang] = useState('Indonesian');
   const [accent, setAccent] = useState('en-US');
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
 
   const consumeToken = () => true;
+
+  const addToast = (type: 'success' | 'error' | 'info' | 'warning', title: string, message?: string) => {
+    const id = crypto.randomUUID();
+    setToasts(prev => [...prev, { id, type, title, message }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   // Global listener untuk menangkap event error AI dari service
   useEffect(() => {
     const handleGlobalAIFail = (e: CustomEvent) => {
-      setToastMessage(e.detail || "Semua cadangan API AI mengalami kendala atau limit habis.");
+      addToast(
+        'error',
+        'Gagal Terhubung ke AI',
+        e.detail || "Semua cadangan API AI mengalami kendala atau limit habis."
+      );
     };
     window.addEventListener('ai-fallback-failed' as any, handleGlobalAIFail);
     return () => window.removeEventListener('ai-fallback-failed' as any, handleGlobalAIFail);
@@ -54,7 +74,7 @@ export default function App() {
         </main>
       </div>
 
-      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+      <ToastContainer toasts={toasts.map(t => ({ ...t, onClose: removeToast }))} />
       <Footer />
     </div>
   );

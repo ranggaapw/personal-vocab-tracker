@@ -29,7 +29,10 @@ async function callOpenAI(prompt: string, isJson: boolean = true) {
             response_format: isJson ? { type: "json_object" } : { type: "text" }
         })
     });
-    if (!response.ok) throw new Error(`OpenAI Error: ${response.status}`);
+    if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson?.error?.message || `ChatGPT Error ${response.status}`);
+    }
     const data = await response.json();
     const text = data.choices[0].message.content;
     return isJson ? JSON.parse(text) : text;
@@ -47,32 +50,74 @@ async function callClaude(prompt: string, isJson: boolean = true) {
             'anthropic-dangerous-direct-browser-access': 'true' // untuk dev/browser test
         },
         body: JSON.stringify({
-            model: 'claude-3-5-haiku-20241022',
+            model: 'claude-3-haiku-20240307', // Menggunakan Claude 3 Haiku agar kompatibel dengan akun free/evaluasi
             max_tokens: 1000,
             messages: [{ role: 'user', content: prompt }]
         })
     });
-    if (!response.ok) throw new Error(`Claude Error: ${response.status}`);
+    if (!response.ok) {
+        const errJson = await response.json().catch(() => ({}));
+        throw new Error(errJson?.error?.message || `Claude Error ${response.status}`);
+    }
     const data = await response.json();
     const text = data.content[0].text;
     return isJson ? JSON.parse(text.replace(/```json|```/g, '').trim()) : text;
+}
+
+function getHumanFriendlyError(provider: 'Gemini' | 'OpenAI' | 'Claude', errorMsg: string): string {
+    const msg = errorMsg.toLowerCase();
+    
+    if (msg.includes('api key not valid') || msg.includes('invalid api key') || msg.includes('key missing') || msg.includes('unauthorized') || msg.includes('401')) {
+        return `Kunci API ${provider} tidak valid atau belum dikonfigurasi.`;
+    }
+    if (msg.includes('quota exceeded') || msg.includes('429') || msg.includes('rate limit') || msg.includes('exhausted') || msg.includes('too many requests')) {
+        return `Batas kuota penggunaan ${provider} telah habis (Rate Limit / Quota Exceeded).`;
+    }
+    if (msg.includes('credit balance') || msg.includes('balance is too low') || msg.includes('no credit')) {
+        return `Saldo/Kredit akun ${provider} Anda habis atau tidak mencukupi.`;
+    }
+    if (msg.includes('not found') || msg.includes('not available') || msg.includes('model')) {
+        return `Model AI ${provider} tidak ditemukan atau tidak didukung pada tingkat akun Anda.`;
+    }
+    if (msg.includes('network') || msg.includes('fetch') || msg.includes('failed to fetch') || msg.includes('connect')) {
+        return `Koneksi jaringan ke server ${provider} terputus.`;
+    }
+    
+    if (errorMsg.includes('{')) {
+        try {
+            const match = errorMsg.match(/"message"\s*:\s*"([^"]+)"/);
+            if (match && match[1]) {
+                return `${provider}: ${match[1]}`;
+            }
+        } catch (_) {}
+    }
+    
+    return `${provider}: ${errorMsg.substring(0, 100)}${errorMsg.length > 100 ? '...' : ''}`;
 }
 
 // 🔄 MULTI-AI FALLBACK EXECUTION WRAPPER
 export async function executeWithAIFallback(prompt: string, isJson: boolean = true) {
     try {
         return await callGemini(prompt, isJson);
-    } catch (geminiErr) {
-        console.warn("⚠️ Gemini limit/error, beralih ke ChatGPT (OpenAI)...");
+    } catch (geminiErr: any) {
+        console.warn("⚠️ Gemini limit/error, beralih ke ChatGPT (OpenAI)...", geminiErr);
         try {
             return await callOpenAI(prompt, isJson);
-        } catch (openaiErr) {
-            console.warn("⚠️ OpenAI limit/error, beralih ke Claude (Anthropic)...");
+        } catch (openaiErr: any) {
+            console.warn("⚠️ OpenAI limit/error, beralih ke Claude (Anthropic)...", openaiErr);
             try {
                 return await callClaude(prompt, isJson);
             } catch (claudeErr: any) {
-                // Trigger Toast ke seluruh aplikasi
-                const errorMsg = `Gemini (429), OpenAI & Claude gagal total: ${claudeErr.message || 'Limit habis'}`;
+                // Buat ringkasan detail error dari masing-masing AI untuk mempermudah debugging pengguna
+                const geminiFriendly = getHumanFriendlyError('Gemini', geminiErr.message || geminiErr.toString());
+                const openaiFriendly = getHumanFriendlyError('OpenAI', openaiErr.message || openaiErr.toString());
+                const claudeFriendly = getHumanFriendlyError('Claude', claudeErr.message || claudeErr.toString());
+
+                const errorMsg = `Semua AI Cadangan Mengalami Kendala:\n` +
+                                 `• ${geminiFriendly}\n` +
+                                 `• ${openaiFriendly}\n` +
+                                 `• ${claudeFriendly}`;
+                
                 window.dispatchEvent(new CustomEvent('ai-fallback-failed', { detail: errorMsg }));
                 throw new Error(errorMsg);
             }
