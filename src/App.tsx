@@ -1,19 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { VocabBox } from './components/VocabBox';
 import { SentenceBox } from './components/SentenceBox';
 import { TensesBox } from './components/TensesBox';
 import { LanguageSelect } from './components/ui/LanguageSelect';
+import { Toast } from './components/ui/Toast';
 import { Settings2 } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'vocab' | 'sentence' | 'tenses'>('vocab');
   const [targetLang, setTargetLang] = useState('Indonesian');
   const [accent, setAccent] = useState('en-US');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Dummy fungsi consumeToken agar tidak error di TensesBox
   const consumeToken = () => true;
+
+  // Global listener untuk menangkap event error AI dari service
+  useEffect(() => {
+    const handleGlobalAIFail = (e: CustomEvent) => {
+      setToastMessage(e.detail || "Semua cadangan API AI mengalami kendala atau limit habis.");
+    };
+    window.addEventListener('ai-fallback-failed' as any, handleGlobalAIFail);
+    return () => window.removeEventListener('ai-fallback-failed' as any, handleGlobalAIFail);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 text-brand-dark flex flex-col justify-between relative overflow-hidden font-sans">
@@ -22,7 +32,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-h-[calc(100vh-140px)]">
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <main className="max-w-7xl mx-auto px-6 md:px-8 mt-10 mb-28 relative z-10 flex-1">
+        <main className="w-full max-w-7xl mx-auto px-6 md:px-8 mt-10 mb-28 relative z-10 flex-1">
           <div className="flex justify-center items-center gap-4 bg-white w-fit mx-auto px-5 py-2.5 rounded-2xl shadow-sm border border-brand-light/40 mb-12">
             <Settings2 className="h-4 w-4 text-slate-400" />
             <select
@@ -44,6 +54,7 @@ export default function App() {
         </main>
       </div>
 
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
       <Footer />
     </div>
   );

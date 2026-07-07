@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useVocabStore } from '../store/useVocabStore';
-import { translateVocab, translateImageOrDoc } from '../services/gemini';
+import { fetchWordFromDictionary } from '../services/dictionary';
+import { translateImageOrDoc } from '../services/gemini';
 import { useSpeech } from '../hooks/useSpeech';
 import { Button } from './ui/Button';
-import { Save, Mic, Volume2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Save, Mic, Volume2, Upload } from 'lucide-react';
 import { DictionaryList } from './DictionaryList';
 
 export function VocabBox({ targetLang, accent }: { targetLang: string, accent: string }) {
@@ -17,10 +18,10 @@ export function VocabBox({ targetLang, accent }: { targetLang: string, accent: s
         if (!sourceText.trim()) { setData(null); return; }
         setIsLoading(true);
         const timer = setTimeout(async () => {
-            const result = await translateVocab(sourceText, targetLang);
+            const result = await fetchWordFromDictionary(sourceText, targetLang);
             setData(result);
             setIsLoading(false);
-        }, 500);
+        }, 400);
         return () => clearTimeout(timer);
     }, [sourceText, targetLang]);
 
@@ -34,7 +35,7 @@ export function VocabBox({ targetLang, accent }: { targetLang: string, accent: s
             const result = await translateImageOrDoc(base64String, file.type, targetLang);
             if (result) {
                 setSourceText(result.originalText);
-                setData({ translation: result.translation, definition: 'Hasil ekstraksi dan terjemahan gambar/dokumen.' });
+                setData({ translation: result.translation, definition: 'Hasil ekstraksi dari dokumen/gambar.' });
             }
             setIsLoading(false);
         };
@@ -55,31 +56,14 @@ export function VocabBox({ targetLang, accent }: { targetLang: string, accent: s
     };
 
     return (
-        <div className="max-w-7xl mx-auto space-y-10 animate-in fade-in duration-300">
+        <div className="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
                 <span className="text-4xl">📖</span>
                 <h2 className="text-4xl font-black text-brand-dark">Vocabulary AI Studio</h2>
-                <p className="text-slate-500 text-lg font-medium">Temukan makna kata secara presisi, kuasai cara pengucapan, dan pelajari penggunaannya dalam contoh kalimat positif, negatif, serta tanya secara otomatis.</p>
+                <p className="text-slate-500 text-lg font-medium">Temukan makna kata secara presisi, kuasai cara pengucapan, dan pelajari penggunaannya dalam contoh kalimat lengkap.</p>
             </div>
 
             <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-brand-dark/5 border border-brand-light/40 overflow-hidden">
-
-                <div className="p-8 bg-brand-pale/25 border-b border-brand-light/30 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-4">
-                        <div className="bg-brand-primary text-white p-3.5 rounded-2xl shadow-md">
-                            <ImageIcon className="h-6 w-6" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-base text-brand-dark">Ekstraksi Teks Pintar (OCR)</h4>
-                            <p className="text-sm text-slate-500">Punya foto halaman buku, artikel, atau dokumen digital? Unggah di sini dan biarkan AI mendeteksi serta menerjemahkan kata-kata sulit untuk Anda secara instan.</p>
-                        </div>
-                    </div>
-
-                    <label className="cursor-pointer inline-flex items-center gap-2.5 bg-brand-primary hover:bg-brand-dark text-white px-6 py-3.5 rounded-2xl text-base font-bold shadow-lg shadow-brand-primary/20 transition-all">
-                        <Upload className="h-5 w-5" /> Pilih Foto / PDF
-                        <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
-                    </label>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-brand-light/30">
                     <div className="p-8 md:p-10 flex flex-col min-h-[260px] bg-slate-50/30">
@@ -89,19 +73,36 @@ export function VocabBox({ targetLang, accent }: { targetLang: string, accent: s
                             placeholder="Tulis satu kata asing di sini untuk mulai menganalisis..."
                             className="w-full flex-1 resize-none outline-none text-2xl font-medium bg-transparent text-brand-dark placeholder:text-slate-300"
                         />
-                        <div className="flex gap-3 mt-6">
-                            <Button variant="ghost" className={`p-2.5 rounded-xl ${isListening ? 'text-red-500 animate-pulse' : ''}`} onClick={() => listen(setSourceText, accent)}>
+                        <div className="flex gap-3 mt-6 items-center">
+                            <Button
+                                variant="ghost"
+                                className={`p-2.5 rounded-xl ${isListening ? 'text-red-500 animate-pulse' : 'text-slate-400 hover:text-brand-primary'}`}
+                                onClick={() => listen(setSourceText, accent)}
+                                title="Bicara untuk menulis (Voice Typing)"
+                            >
                                 <Mic className="h-6 w-6" />
                             </Button>
-                            <Button variant="ghost" className="p-2.5 rounded-xl" onClick={() => speak(sourceText, accent)}>
+                            <Button
+                                variant="ghost"
+                                className="p-2.5 rounded-xl text-slate-400 hover:text-brand-primary"
+                                onClick={() => speak(sourceText, accent)}
+                                title="Dengarkan pengucapan"
+                            >
                                 <Volume2 className="h-6 w-6" />
                             </Button>
+                            <label
+                                className="cursor-pointer p-2.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-brand-primary transition-all flex items-center justify-center"
+                                title="Unggah Gambar / PDF (Ekstrak Teks OCR)"
+                            >
+                                <Upload className="h-6 w-6" />
+                                <input type="file" accept="image/*,.pdf" onChange={handleFileUpload} className="hidden" />
+                            </label>
                         </div>
                     </div>
 
                     <div className="p-8 md:p-10 flex flex-col min-h-[260px] bg-brand-pale/10 relative justify-between">
                         <div className="flex-1">
-                            {isLoading ? <p className="text-2xl animate-pulse text-brand-primary">Menganalisis kosakata dengan AI...</p>
+                            {isLoading ? <p className="text-2xl animate-pulse text-brand-primary">Menganalisis kata...</p>
                                 : data?.translation ? (
                                     <>
                                         <p className="text-4xl font-extrabold text-brand-dark">{data.translation}</p>

@@ -4,6 +4,7 @@ import { Card } from './ui/Card';
 import { Button } from './ui/Button';
 import { Trash2, Volume2, CheckCircle, XCircle, HelpCircle, Lightbulb, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSpeech } from '../hooks/useSpeech';
+import { Pagination } from './ui/Pagination';
 
 export function DictionaryList({ type }: { type: 'word' | 'sentence' }) {
     const { vocabList, deleteVocab } = useVocabStore();
@@ -11,6 +12,10 @@ export function DictionaryList({ type }: { type: 'word' | 'sentence' }) {
 
     // State untuk menyimpan ID item yang sedang dibuka
     const [expandedId, setExpandedId] = useState<string | null>(null);
+
+    // State untuk Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     const filteredList = vocabList.filter(v => v.type === type);
 
@@ -20,6 +25,18 @@ export function DictionaryList({ type }: { type: 'word' | 'sentence' }) {
         setExpandedId(prev => prev === id ? null : id);
     };
 
+    // Hitung halaman yang valid
+    const totalPages = Math.ceil(filteredList.length / itemsPerPage);
+    const validCurrentPage = Math.min(currentPage, totalPages || 1);
+
+    const startIndex = (validCurrentPage - 1) * itemsPerPage;
+    const paginatedList = filteredList.slice(startIndex, startIndex + itemsPerPage);
+
+    const handleItemsPerPageChange = (size: number) => {
+        setItemsPerPage(size);
+        setCurrentPage(1);
+    };
+
     return (
         <div className="mt-8">
             <h3 className="text-sm font-bold text-brand-primary uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -27,7 +44,7 @@ export function DictionaryList({ type }: { type: 'word' | 'sentence' }) {
             </h3>
 
             <div className="flex flex-col gap-3">
-                {filteredList.map((item) => {
+                {paginatedList.map((item) => {
                     const isExpanded = expandedId === item.id;
 
                     return (
@@ -103,6 +120,14 @@ export function DictionaryList({ type }: { type: 'word' | 'sentence' }) {
                     );
                 })}
             </div>
+
+            <Pagination
+                currentPage={validCurrentPage}
+                totalItems={filteredList.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={(page) => setCurrentPage(page)}
+                onItemsPerPageChange={handleItemsPerPageChange}
+            />
         </div>
     );
 }

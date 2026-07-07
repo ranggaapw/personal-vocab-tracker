@@ -4,7 +4,7 @@ export const translateVocab = async (text: string, targetLanguage: string) => {
     const cleanText = text.trim().split(' ')[0];
     if (!cleanText) return null;
 
-    const prompt = `You are a professional dictionary. Target language: ${targetLanguage}. Word: "${cleanText}". Respond STRICTLY in JSON format: {"translation": "direct translation", "phonetic": "IPA phonetic spelling", "definition": "Explanation in ${targetLanguage}", "examples": {"positive": {"en": "example", "target": "translation"}, "negative": {"en": "example", "target": "translation"}, "interrogative": {"en": "example", "target": "translation"}}}`;
+    const prompt = `You are a professional dictionary. Target language: ${targetLanguage}. Word: "${cleanText}". Respond STRICTLY in JSON format: {"translation": "direct translation", "phonetic": "IPA phonetic spelling of the original English word (e.g., for 'involved' it is /ɪn'vɒlvd/ and for 'bee' it is /biː/, NOT the translation)", "definition": "Explanation in ${targetLanguage}", "examples": {"positive": {"en": "example", "target": "translation"}, "negative": {"en": "example", "target": "translation"}, "interrogative": {"en": "example", "target": "translation"}}}`;
 
     try {
         return await executeWithAIFallback(prompt, true);
@@ -53,5 +53,14 @@ export const transformTenseSingle = async (text: string, selectedTense: string, 
     } catch (err) {
         console.error("Transform Tense failed on all AIs", err);
         return null;
+    }
+};
+
+export const translateText = async (text: string, targetLanguage: string) => {
+    const cleanText = text.trim();
+    if (cleanText.split(/\s+/).length > 2) {
+        return translateSentence(cleanText, targetLanguage);
+    } else {
+        return translateVocab(cleanText, targetLanguage);
     }
 };

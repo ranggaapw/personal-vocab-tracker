@@ -60,25 +60,21 @@ async function callClaude(prompt: string, isJson: boolean = true) {
 
 // 🔄 MULTI-AI FALLBACK EXECUTION WRAPPER
 export async function executeWithAIFallback(prompt: string, isJson: boolean = true) {
-    // Coba Gemini dulu
     try {
-        console.log("Mencoba menggunakan Gemini API...");
         return await callGemini(prompt, isJson);
     } catch (geminiErr) {
-        console.warn("⚠️ Gemini limit/error tercapai, beralih ke ChatGPT (OpenAI)...", geminiErr);
-
-        // Coba OpenAI (ChatGPT)
+        console.warn("⚠️ Gemini limit/error, beralih ke ChatGPT (OpenAI)...");
         try {
             return await callOpenAI(prompt, isJson);
         } catch (openaiErr) {
-            console.warn("⚠️ OpenAI limit/error tercapai, beralih ke Claude (Anthropic)...", openaiErr);
-
-            // Coba Claude sebagai benteng terakhir
+            console.warn("⚠️ OpenAI limit/error, beralih ke Claude (Anthropic)...");
             try {
                 return await callClaude(prompt, isJson);
-            } catch (claudeErr) {
-                console.error("❌ Semua AI Provider (Gemini, OpenAI, Claude) gagal atau limit habis!", claudeErr);
-                throw new Error("Semua layanan AI sedang sibuk atau kuota habis total.");
+            } catch (claudeErr: any) {
+                // Trigger Toast ke seluruh aplikasi
+                const errorMsg = `Gemini (429), OpenAI & Claude gagal total: ${claudeErr.message || 'Limit habis'}`;
+                window.dispatchEvent(new CustomEvent('ai-fallback-failed', { detail: errorMsg }));
+                throw new Error(errorMsg);
             }
         }
     }
