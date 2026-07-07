@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@theme {
+    /* Font Utama */
+    --font-sans: "Roboto", sans-serif;
+
+    /* Color Palette dari Color Hunt */
+    --color-brand-dark: #293681;
+    /* Biru Tua */
+    --color-brand-primary: #4274D9;
+    /* Biru Terang (Tombol & Aksen) */
+    --color-brand-light: #95CCDD;
+    /* Biru Muda (Border & Aksen Sekunder) */
+    --color-brand-bg: #D0E7E6;
+    /* Putih Kebiruan (Background Utama) */
+}
+
+/* Base styling biar otomatis teraplikasi ke seluruh body */
+@layer base {
+    body {
+        @apply bg-brand-bg text-slate-800 font-sans antialiased;
+    }
+}

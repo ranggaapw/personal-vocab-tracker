@@ -1,16 +1,22 @@
+export interface BilingualSentence {
+    en: string;
+    target: string;
+}
+
 export interface ExampleSentences {
-    positive: string;
-    negative: string;
-    interrogative: string;
+    positive: BilingualSentence;
+    negative: BilingualSentence;
+    interrogative: BilingualSentence;
 }
 
 export interface VocabItem {
     id: string;
-    word: string;           // Kata, idiom, atau kalimat yang dicari
-    meaning: string;        // Arti dari hasil pencarian
-    sourceShow: string;     // Judul Film / Series (Contoh: "Hogwarts Legacy" / "Suits")
-    sourceEpisode: string;  // Episode (Contoh: "S01E01" atau "Clip")
-    type: 'word' | 'idiom' | 'sentence';
-    examples: ExampleSentences;
-    createdAt: number;      // Timestamp untuk pengurutan
+    word: string;
+    meaning: string;
+    phonetic?: string;
+    definition?: string; // Penjelasan untuk Vocab
+    intent?: string;     // Maksud dari Kalimat/Idiom
+    examples?: ExampleSentences;
+    type: 'word' | 'sentence';
+    createdAt: number;
 }
