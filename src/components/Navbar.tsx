@@ -1,19 +1,11 @@
-import { BookOpen, BookA, FileText, Sparkles, Cpu } from 'lucide-react';
+import { BookOpen, BookA, FileText, Sparkles } from 'lucide-react';
 
 interface NavbarProps {
     activeTab: 'vocab' | 'sentence' | 'tenses';
     setActiveTab: (tab: 'vocab' | 'sentence' | 'tenses') => void;
-    tokenQuota: number; // 0 - 100
 }
 
-export function Navbar({ activeTab, setActiveTab, tokenQuota }: NavbarProps) {
-    // Tentukan warna indikator kuota
-    const getColor = () => {
-        if (tokenQuota > 40) return 'text-green-600 bg-green-50 border-green-200';
-        if (tokenQuota > 10) return 'text-amber-600 bg-amber-50 border-amber-200';
-        return 'text-red-600 bg-red-50 border-red-200 animate-pulse';
-    };
-
+export function Navbar({ activeTab, setActiveTab }: NavbarProps) {
     return (
         <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-light/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
             <div className="flex items-center gap-3">
@@ -44,11 +36,7 @@ export function Navbar({ activeTab, setActiveTab, tokenQuota }: NavbarProps) {
                 </button>
             </div>
 
-            {/* Monitor Kuota Token Kecil di Navbar */}
-            <div className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl border text-xs font-bold ${getColor()}`}>
-                <Cpu className="h-4 w-4" />
-                <span>Quota: {tokenQuota}%</span>
-            </div>
+            <div className="w-10"></div> {/* Spacer penyeimbang */}
         </nav>
     );
 }
