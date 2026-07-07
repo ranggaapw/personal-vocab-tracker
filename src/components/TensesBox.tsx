@@ -247,7 +247,7 @@ export function TensesBox({ targetLang, accent, consumeToken }: { targetLang: st
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in duration-300">
+        <div className="w-full max-w-full mx-auto space-y-10 animate-in fade-in duration-300">
             {/* 1. Header Halaman */}
             <div className="text-center space-y-3">
                 <span className="text-4xl">⚡</span>

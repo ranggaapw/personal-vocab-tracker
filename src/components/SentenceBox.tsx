@@ -61,7 +61,7 @@ export function SentenceBox({ targetLang, accent }: { targetLang: string, accent
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in duration-300">
+        <div className="w-full max-w-full mx-auto space-y-10 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
                 <span className="text-4xl">✍️</span>
                 <h2 className="text-4xl font-black text-brand-dark">Detektor Kalimat & Idiom</h2>

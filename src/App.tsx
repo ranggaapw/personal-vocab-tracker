@@ -70,7 +70,7 @@ export default function App() {
       <div className="flex-1 flex flex-col min-h-[calc(100vh-140px)]">
         <Navbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <main className="w-full max-w-7xl mx-auto px-6 md:px-8 mt-10 mb-28 relative z-10 flex-1">
+        <main className="w-full max-w-[92rem] mx-auto px-6 md:px-8 mt-10 mb-28 relative z-10 flex-1">
           <div className="flex justify-center items-center gap-4 bg-white w-fit mx-auto px-5 py-2.5 rounded-2xl shadow-sm border border-brand-light/40 mb-12">
             <Settings2 className="h-4 w-4 text-slate-400" />
             <select

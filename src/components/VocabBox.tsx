@@ -71,7 +71,7 @@ export function VocabBox({ targetLang, accent }: { targetLang: string, accent: s
     };
 
     return (
-        <div className="w-full max-w-7xl mx-auto space-y-10 animate-in fade-in duration-300">
+        <div className="w-full max-w-full mx-auto space-y-10 animate-in fade-in duration-300">
             <div className="text-center space-y-3">
                 <span className="text-4xl">📖</span>
                 <h2 className="text-4xl font-black text-brand-dark">Kamus Kosakata AI</h2>

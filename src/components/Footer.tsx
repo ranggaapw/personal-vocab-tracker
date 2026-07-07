@@ -19,7 +19,7 @@ export function Footer() {
 
     return (
         <footer className="mt-32 border-t border-brand-light/30 bg-gradient-to-b from-white to-brand-pale/20 py-16 px-6">
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-[92rem] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
                 {/* Kiri: Info & Socials */}
                 <div className="space-y-4">
