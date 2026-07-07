@@ -7,36 +7,38 @@ interface NavbarProps {
 
 export function Navbar({ activeTab, setActiveTab }: NavbarProps) {
     return (
-        <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-brand-light/30 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-3">
-                <div className="bg-brand-primary text-white p-2.5 rounded-2xl shadow-md shadow-brand-primary/20">
-                    <BookOpen className="h-5 w-5" />
+        <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-lg border-b border-slate-100 px-8 md:px-12 py-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-3.5">
+                <div className="bg-brand-primary text-white p-3 rounded-2xl shadow-lg shadow-brand-primary/25 transition-transform hover:scale-105 duration-300">
+                    <BookOpen className="h-6 w-6" />
                 </div>
-                <h1 className="text-xl font-black tracking-tight text-brand-dark">Vocab Studio</h1>
+                <h1 className="text-2xl font-black tracking-tight text-slate-800">
+                    Vocab <span className="bg-gradient-to-r from-brand-primary to-purple-600 bg-clip-text text-transparent">Studio AI</span>
+                </h1>
             </div>
 
-            <div className="flex items-center gap-1.5 bg-brand-pale/30 p-1.5 rounded-2xl border border-brand-light/30 flex-wrap justify-center">
+            <div className="flex items-center gap-2 bg-slate-100/80 p-2 rounded-[1.5rem] border border-slate-200/50 flex-wrap justify-center shadow-inner">
                 <button
                     onClick={() => setActiveTab('vocab')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'vocab' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-600 hover:text-brand-dark'}`}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-base font-extrabold transition-all duration-300 ${activeTab === 'vocab' ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/25 scale-[1.02]' : 'text-slate-600 hover:text-brand-primary hover:bg-slate-50'}`}
                 >
-                    <BookA className="h-4 w-4" /> 📖 Vocabulary
+                    <BookA className="h-5 w-5" /> Kosakata AI
                 </button>
                 <button
                     onClick={() => setActiveTab('sentence')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'sentence' ? 'bg-brand-primary text-white shadow-sm' : 'text-slate-600 hover:text-brand-dark'}`}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-base font-extrabold transition-all duration-300 ${activeTab === 'sentence' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/25 scale-[1.02]' : 'text-slate-600 hover:text-indigo-600 hover:bg-slate-50'}`}
                 >
-                    <FileText className="h-4 w-4" /> ✍️ Sentence
+                    <FileText className="h-5 w-5" /> Analisis Kalimat
                 </button>
                 <button
                     onClick={() => setActiveTab('tenses')}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'tenses' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-600 hover:text-emerald-700'}`}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-base font-extrabold transition-all duration-300 ${activeTab === 'tenses' ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/25 scale-[1.02]' : 'text-slate-600 hover:text-emerald-700 hover:bg-slate-50'}`}
                 >
-                    <Sparkles className="h-4 w-4" /> ⚡ 16 Tenses
+                    <Sparkles className="h-5 w-5" /> Konversi Tenses
                 </button>
             </div>
 
-            <div className="w-10"></div> {/* Spacer penyeimbang */}
+            <div className="hidden md:block w-12"></div> {/* Spacer penyeimbang */}
         </nav>
     );
 }

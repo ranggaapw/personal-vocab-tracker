@@ -17,14 +17,64 @@ export function useSpeech() {
 
         const utterance = new SpeechSynthesisUtterance(text);
 
-        // Cari suara yang paling cocok dengan logat/bahasa yang diminta
-        const exactVoice = voices.find(v => v.lang === langCode);
-        const partialVoice = voices.find(v => v.lang.startsWith(langCode.split('-')[0]));
+        // Atur kecepatan dan nada agar pelafalan terdengar natural, jelas, dan mudah dipahami pembelajar
+        utterance.rate = 0.92;
+        utterance.pitch = 1.05;
 
-        if (exactVoice) {
-            utterance.voice = exactVoice;
-        } else if (partialVoice) {
-            utterance.voice = partialVoice;
+        // Ambil list suara langsung secara real-time untuk menghindari stale state closure
+        const allVoices = window.speechSynthesis.getVoices();
+
+        // Cari suara yang cocok dengan logat/bahasa yang diminta
+        const matchedVoices = allVoices.filter(v => 
+            v.lang.toLowerCase() === langCode.toLowerCase() || 
+            v.lang.toLowerCase().replace('_', '-') === langCode.toLowerCase().replace('_', '-')
+        );
+
+        // Cari suara perempuan (female) di list yang cocok
+        let selectedVoice = matchedVoices.find(v => {
+            const name = v.name.toLowerCase();
+            return name.includes('female') || 
+                   name.includes('zira') || 
+                   name.includes('samantha') || 
+                   name.includes('google us english') || 
+                   name.includes('google uk english female') || 
+                   name.includes('karen') || 
+                   name.includes('hazel') || 
+                   name.includes('catherine') || 
+                   name.includes('salli') || 
+                   name.includes('joanna');
+        });
+
+        // Jika tidak ada suara perempuan spesifik, ambil suara pertama yang cocok dengan bahasa/logat tersebut
+        if (!selectedVoice && matchedVoices.length > 0) {
+            selectedVoice = matchedVoices[0];
+        }
+
+        // Fallback ke pencarian parsial jika logat spesifik tidak terpasang di perangkat
+        if (!selectedVoice) {
+            const mainLang = langCode.split('-')[0].toLowerCase();
+            const partialVoices = allVoices.filter(v => v.lang.toLowerCase().startsWith(mainLang));
+            
+            selectedVoice = partialVoices.find(v => {
+                const name = v.name.toLowerCase();
+                return name.includes('female') || 
+                       name.includes('zira') || 
+                       name.includes('samantha') || 
+                       name.includes('google') || 
+                       name.includes('karen') || 
+                       name.includes('hazel');
+            });
+            
+            if (!selectedVoice && partialVoices.length > 0) {
+                selectedVoice = partialVoices[0];
+            }
+        }
+
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+            console.log(`[TTS] Menggunakan suara: ${selectedVoice.name} (${selectedVoice.lang})`);
+        } else {
+            console.warn(`[TTS] Suara aksen ${langCode} tidak terdeteksi, menggunakan default browser.`);
         }
 
         window.speechSynthesis.speak(utterance);

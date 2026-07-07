@@ -16,10 +16,28 @@ interface ToastItem {
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<'vocab' | 'sentence' | 'tenses'>('vocab');
-  const [targetLang, setTargetLang] = useState('Indonesian');
-  const [accent, setAccent] = useState('en-US');
+  const [activeTab, setActiveTab] = useState<'vocab' | 'sentence' | 'tenses'>(() => {
+    return (localStorage.getItem('vocab_tracker_active_tab') as 'vocab' | 'sentence' | 'tenses') || 'vocab';
+  });
+  const [targetLang, setTargetLang] = useState(() => {
+    return localStorage.getItem('vocab_tracker_target_lang') || 'Indonesian';
+  });
+  const [accent, setAccent] = useState(() => {
+    return localStorage.getItem('vocab_tracker_accent') || 'en-US';
+  });
   const [toasts, setToasts] = useState<ToastItem[]>([]);
+
+  useEffect(() => {
+    localStorage.setItem('vocab_tracker_active_tab', activeTab);
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem('vocab_tracker_target_lang', targetLang);
+  }, [targetLang]);
+
+  useEffect(() => {
+    localStorage.setItem('vocab_tracker_accent', accent);
+  }, [accent]);
 
   const consumeToken = () => true;
 
